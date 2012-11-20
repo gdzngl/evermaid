@@ -36,6 +36,46 @@ class EverMaid
     my_filter = get_filter(query)
     @noteStore.findNotes(AUTH_TOKEN, my_filter, 0, 10)
   end
+
+  def tags
+    @my_tags = {}
+    evernote_tags = @noteStore.listTags(AUTH_TOKEN)
+    for item in evernote_tags
+      @my_tags["#{item.name}"] = item.guid
+    end
+    return @my_tags
+  end
+
+  def get_note(guid)
+    @noteStore.getNote(AUTH_TOKEN, guid, 1, 0, 0, 0)
+  end
+
+  def is_tagged(note, tag)
+    does_it_have_the_tag = :no_tag
+    my_tags = tags
+    for item in note.tagGuids
+      if tags.key(item) == tag
+        does_it_have_the_tag = :has_tag
+      end
+    end
+    return does_it_have_the_tag
+  end
+
+  def update_active(notes)
+    for item in notes.notes
+      if is_tagged(item, "active") == :has_tag
+        next
+      else
+        note_to_update = get_note(item.guid)
+        note_to_update.tagGuids << @my_tags["active"]
+        @noteStore.updateNote(AUTH_TOKEN, note_to_update)
+      end
+    end
+  end
+
+  #def remove_tag(note, tag)
+    #this_
+  #end
 end
 
 
