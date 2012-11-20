@@ -25,8 +25,16 @@ class EverMaid
     @noteStore.listNotebooks(AUTH_TOKEN)
   end
 
+  def get_filter(search_string)
+    filter = Evernote::EDAM::NoteStore::NoteFilter.new
+    filter.words = search_string
+    #filter.order = Evernote::EDAM::Type::NoteSortOrder::UPDATED
+    return filter
+  end
+
   def search(query)
-    @noteStore.findNotes(AUTH_TOKEN, "word")
+    my_filter = get_filter(query)
+    @noteStore.findNotes(AUTH_TOKEN, my_filter, 0, 10)
   end
 end
 
