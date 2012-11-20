@@ -1,2 +1,2 @@
 AUTH_TOKEN = "your developer token"
-evernoteHost = "sandbox.evernote.com"
+E_HOST = "sandbox.evernote.com"

@@ -3,7 +3,7 @@ require_relative 'token.rb'
 
 class EverMaid
   def initialize
-    userStoreUrl = "https://#{evernoteHost}/edam/user"
+    userStoreUrl = "https://#{E_HOST}/edam/user"
 
     userStoreTransport = Thrift::HTTPClientTransport.new(userStoreUrl)
     userStoreProtocol = Thrift::BinaryProtocol.new(userStoreTransport)
@@ -22,17 +22,12 @@ class EverMaid
   end
 
   def notebooks
-    p @noteStore.listNotebooks(AUTH_TOKEN)
     @noteStore.listNotebooks(AUTH_TOKEN)
+  end
+
+  def search(query)
+    @noteStore.findNotes(AUTH_TOKEN, "word")
   end
 end
 
-#noteStore = EverMaid.new
 
-# List all of the notebooks in the user's account
-#notebooks = noteStore.listNotebooks(AUTH_TOKEN)
-#puts "Found #{notebooks.size} notebooks:"
-#defaultNotebook = notebooks.first
-#notebooks.each do |notebook|
-  #puts "  * #{notebook.name}"
-#end
