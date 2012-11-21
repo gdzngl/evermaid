@@ -1,3 +1,4 @@
+require 'chronic'
 require 'evernote-thrift'
 require_relative 'token.rb'
 
@@ -53,9 +54,11 @@ class EverMaid
   def is_tagged(note, tag)
     does_it_have_the_tag = :no_tag
     my_tags = tags
-    for item in note.tagGuids
-      if tags.key(item) == tag
-        does_it_have_the_tag = :has_tag
+    unless note.tagGuids.nil?
+      for item in note.tagGuids
+        if tags.key(item) == tag
+          does_it_have_the_tag = :has_tag
+        end
       end
     end
     return does_it_have_the_tag
@@ -67,15 +70,47 @@ class EverMaid
         next
       else
         note_to_update = get_note(item.guid)
+        if note_to_update.tagGuids.nil?
+          note_to_update.tagGuids = []
+        end
         note_to_update.tagGuids << @my_tags["active"]
         @noteStore.updateNote(AUTH_TOKEN, note_to_update)
       end
     end
   end
 
-  #def remove_tag(note, tag)
-    #this_
-  #end
+  def remove_tag(note, tag)
+    this_note = get_note(note.guid)
+    if this_note.tagGuids.include?(@my_tags[tag])
+      this_note.tagGuids.delete(@my_tags[tag])
+      @noteStore.updateNote(AUTH_TOKEN, this_note)
+    end
+  end
+
+  def display_content(note)
+    split_content = note.content.split('<')
+  end
+
+  def check_for_field(content, field)
+    unless content.class == Array
+      puts "BAD CONTENT: #{content}"
+      return 1
+    end
+    for item in content
+      if item.include?(field)
+        return item.split('>').last
+      end
+    end
+  end
+
+  def magic_date_field(field)
+    my_field = field.split(':')
+    if my_field.length > 2
+      puts "SOMETHING IS WRONG #{my_field}"
+    else
+      puts Chronic.parse(my_field[1])
+    end
+  end
 end
 
 

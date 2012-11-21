@@ -1,5 +1,6 @@
 source "http://rubygems.org"
 gem 'evernote-thrift'
+gem 'chronic'
 
 group :development do
   gem 'coco'
