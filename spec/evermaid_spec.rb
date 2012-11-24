@@ -8,6 +8,7 @@ describe "EverMaid" do
   end
   before(:all){
       @my_ever = EverMaid.new
+      @test_note = @my_ever.get_note("c5fc1802-d068-4edd-9ba7-b8891ac5448a")
   }
 
   it "should list one notebook" do
@@ -50,25 +51,40 @@ describe "EverMaid" do
     @my_ever.remove_tag(this_note, "active")
   end
 
-  it "should display the contents of a note" do
+  it "should return an error if checking for a field that doesn't exist" do
     my_note = @my_ever.get_note("c5fc1802-d068-4edd-9ba7-b8891ac5448a")
-    @my_ever.display_content(my_note).should be_an_instance_of(Array)
-  end
-
-  it "should return an error if checking for a field in the wrong kind of data" do
-    @my_ever.check_for_field("ha ha", "ha").should eql 1
+    @my_ever.check_for_field(my_note, "ha ha").should eql 1
   end
 
   it "should return the field when checking for a field that exists" do
     my_note = @my_ever.get_note("c5fc1802-d068-4edd-9ba7-b8891ac5448a")
-    my_note_content = @my_ever.display_content(my_note)
-    @my_ever.check_for_field(my_note_content, "EM-Review:").should eql("EM-Review: next week")
+    @my_ever.check_for_field(my_note, "EM-Review:").should eql("EM-Review: in one week")
   end
 
   it "should update the field with a date stamp" do
     future_date_tmp = DateTime.now + 7
     future_date = future_date_tmp.strftime("%F")
-    @my_ever.magic_date_field("EM-Review: next week").should eql("EM-Review: #{future_date}")
+    @my_ever.magic_date_field("EM-Review: in one week").should eql("EM-Review: #{future_date}")
   end
+
+  it "should check if a note contains a string" do
+    my_note = @my_ever.get_note("c5fc1802-d068-4edd-9ba7-b8891ac5448a")
+    @my_ever.check_content(my_note, "word").should eql(:has_content)
+    @my_ever.check_content(my_note, "noth this").should eql(:no_content)
+  end
+
+  it "should update the note with a new date" do
+    future_date_tmp = DateTime.now + 7
+    future_date = future_date_tmp.strftime("%F")
+    my_note = @my_ever.get_note("c5fc1802-d068-4edd-9ba7-b8891ac5448a")
+    @my_ever.check_content(my_note, future_date).should eql(:no_content)
+    @my_ever.update_field(my_note, "EM-Review")
+    my_note = @my_ever.get_note("c5fc1802-d068-4edd-9ba7-b8891ac5448a")
+    @my_ever.check_content(my_note, future_date).should eql(:has_content)
+  end
+
+  after(:all){
+    @my_ever.update_entire_content(@test_note, @test_note.content)
+  }
 
 end

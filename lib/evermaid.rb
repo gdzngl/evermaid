@@ -87,20 +87,15 @@ class EverMaid
     end
   end
 
-  def display_content(note)
+  def check_for_field(note, field)
     split_content = note.content.split('<')
-  end
-
-  def check_for_field(content, field)
-    unless content.class == Array
-      puts "BAD CONTENT: #{content}"
-      return 1
-    end
-    for item in content
+    p split_content
+    for item in split_content
       if item.include?(field)
         return item.split('>').last
       end
     end
+    return 1
   end
 
   def magic_date_field(field)
@@ -108,8 +103,30 @@ class EverMaid
     if my_field.length > 2
       puts "SOMETHING IS WRONG #{my_field}"
     else
-      puts Chronic.parse(my_field[1])
+      return "#{my_field[0]}: #{Chronic.parse(my_field[1]).strftime("%F")}"
     end
+  end
+
+  def update_entire_content(note, new_content)
+    note.content = new_content
+    @noteStore.updateNote(AUTH_TOKEN, note)
+  end
+
+  def check_content(note, search)
+    note_has_search_term = :no_content
+    unless note.content.nil?
+      if note.content.include?(search)
+        note_has_search_term = :has_content
+      end
+    end
+    return note_has_search_term
+  end
+
+  def update_field(note, field)
+    field_with_data = check_for_field(note, field)
+    new_field = magic_date_field(field_with_data)
+    note.content.gsub!(field_with_data, new_field)
+    @noteStore.updateNote(AUTH_TOKEN, note)
   end
 end
 
